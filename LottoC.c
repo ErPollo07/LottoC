@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
 void ClrSrc() {
     system("@cls||clear");
 }
 
-
 void printMenu(char menu[][100]) {
     printf("================\n");
-    printf(menu[0]);
+    printf("%s", menu[0]);
     printf("\n================\n");
 
     int lenghtOfMenu = lenghtOfArrayOfString(menu);
@@ -30,7 +31,7 @@ int lenghtOfArrayOfString(char array[][100]) {
     return lunghezza;
 }
 
-void printLottoWord() {
+void PrintLottoWord() {
     printf("          ..:---::.         .:----:..         .:----:.         ..:----:.         .::---:..\n"
            "        :-=+++++++=-:.   .:=++++++++=-.    .-=++++++++=-.    :-=++++++++=:.   .:==+++++++=-:\n"
            "      .=++-:.   .:-=+=:.:=+=-..   .:=++-..-++=:..  ..:=+=-..=++=:.   .:-=+=: :=+=-:.   .:-++=.\n"
@@ -72,6 +73,8 @@ int takeNumberOfWheels(char menuOption[][100]) {
     int choice;
     int numberOfWheels;
     int correctInserction;
+
+    printf("\n");
 
     printMenu(menuOption);
 
@@ -120,6 +123,97 @@ int takeSpecificWheel(char menuOption[][100]) {
     return specificWheel;
 }
 
+int randomValue(int minValue, int maxValue) {
+    return rand() % (maxValue - minValue + 1) + minValue;
+}
+
+// Funzione per generare casualmente numeri nelle ruote del lotto senza ripetizioni
+void ExtractedWheel(int *numbers) {
+    int minValue = 1, maxValue = 90;
+    int wheelSize = 5;
+
+    srand(time(NULL)); // Inizializza il seme del generatore casuale
+
+    for (int i = 0; i < wheelSize; i++) {
+        numbers[i] = randomValue(minValue, maxValue);
+
+        // Controllo se il numero si ripete
+        for (int k = 0; k < i; k++) {
+            if (numbers[i] == numbers[k]) {
+                i--; // Riavvia la generazione del numero
+                break;
+            }
+        }
+    }
+}
+
+/*
+!   PLAYER FUNCTIONS
+*/
+
+/*
+Take player numbers
+param *playerNumbers pointer to the array of playerNumbers
+*/
+void TakePlayerNumbers(int *playerNumbers, int playerNumbersLenght) {
+    int numbersChecker[90] = {};
+    int correctInserction, continueToInsert = 1;
+    int number;
+
+
+    printf("Inserisci i numeri su cui si vuole scommettere.\nSe non vuoi inserire altri numeri inserire 0.");
+
+    for (int i = 0; i < playerNumbersLenght && continueToInsert; i++) {
+        do {
+            correctInserction = 1;
+
+            // Ask the player to insert a number
+            printf("\nInserisci un numero (inserire 0 per smettere di inserire): ");
+            scanf("%d", &number);
+
+            /* ERROR MESSAGE */
+            // Check if the number is different from 0
+            if (number != 0) {
+                // Check if the number is in the correct interval
+                if (number < 0 || number > 90) {
+                    printf("Devi inserire un numero tra 1 e 90");
+                    correctInserction = 0;
+                }
+                // check if the number is already insert
+                else if (numbersChecker[number - 1]) {
+                    printf("Numero gia inserito.");
+                    correctInserction = 0;
+                }
+                // if the number is in the right interval and isn't already insert
+                else {
+                    numbersChecker[number - 1] = 1; // set the variable of the number to 1 (true),
+                    // so it means that is already insert
+                    playerNumbers[i] = number; // put the number in the right place
+                }
+            }
+            /* END ERROR MESSAGE */
+            else
+                continueToInsert = 0;
+        } while(!correctInserction);
+    }
+}
+
+int RetrivePlayedNumbers(int *playerNumbers, int lenght) {
+    int playedNumbers = 0;
+    
+    for (int i = 0; i < lenght && playerNumbers[i] != 0; i++) {
+        playedNumbers++;
+    }
+
+    return playedNumbers;
+}
+
+void PrintArrayInt(int *array, int lenght) {
+    for (int i = 0; i < lenght; i++) {
+        printf("%d ", array[i]);
+    }
+}
+
 void main()
 {
     char introductionMenu[][100] = {
@@ -166,8 +260,8 @@ void main()
         "[2] - No"
     };
 
-    int playerNumbers[10]; // Number of the player
-    int playerBetTypes[5]; // The bets of the player (singolo, ambo, terna, quaterna, cinquina)
+    int playerNumbers[10] = {}; // Number of the player
+    int playerBetTypes[5] = {}; // The bets of the player (singolo, ambo, terna, quaterna, cinquina)
     int wheels[10][5]; // The 2d array for store all the wheels
     int numberOfWheels; // How many wheels the player chooses to player on
     int whatWheel = 0; // number of the wheel that the player wants to play on
@@ -179,7 +273,7 @@ void main()
     char _pause;
 
     ClrSrc();
-    printLottoWord();
+    PrintLottoWord();
 
     printMenu(introductionMenu);
 
@@ -187,16 +281,16 @@ void main()
     scanf("%c", &_pause);
 
     ClrSrc();
-    printLottoWord();
+    PrintLottoWord();
 
     printf("Step 1\n\tInserire l'importo\n\n");
     // Ask the player to insert the amount of money he wants to bet
     amount = takeAmount();
 
     ClrSrc();
-    printLottoWord();
+    PrintLottoWord();
 
-    printf("Step 2\n\tScegliere su quante ruote giocare\n\n");
+    printf("Step 2\n\tScegliere su quante ruote giocare\n");
     // Ask the player how many wheels he what to bet on
     numberOfWheels = takeNumberOfWheels(numberOfWheelMenu);
 
@@ -205,16 +299,28 @@ void main()
     //   2. generate the wheel numbers
     if (numberOfWheels <= 1) {
         ClrSrc();
-        printLottoWord();
+        PrintLottoWord();
         printf("Step 2.1\n\tScegliere su quale ruota giocare\n\n");
         whatWheel = takeSpecificWheel(specificWheelsMenu);
 
-        wheels[whatWheel] = extractedWheel();
+        ExtractedWheel(wheels[whatWheel - 1]);
     }
+    // else
+    //   generate the wheel numbers for all the wheels
     else {
         for (int i = 0; i < numberOfWheels; i++)
-            wheels[i] = extractedWheel();
+            ExtractedWheel(wheels[i]);
     }
+
+    ClrSrc();
+    PrintLottoWord();
+    printf("Step 3\n\tInserire i propri numeri\n\n");
+
+    TakePlayerNumbers(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
+
+    counterOfPlayedNumbers = RetrivePlayedNumbers(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
+
+    printf("%d", counterOfPlayedNumbers);
 
     printf("\n\n");
 }
