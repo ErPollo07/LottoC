@@ -1,5 +1,124 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+
+void ClrSrc() {
+    system("@cls||clear");
+}
+
+
+void printMenu(char menu[][100]) {
+    printf("================\n");
+    printf(menu[0]);
+    printf("\n================\n");
+
+    int lenghtOfMenu = lenghtOfArrayOfString(menu);
+
+    for (int i = 1; i < lenghtOfMenu; i++) {
+        printf("%s\n", menu[i]);
+    }
+}
+
+int lenghtOfArrayOfString(char array[][100]) {
+    int lunghezza = 0;
+
+    // Continua a contare finché la stringa non è vuota
+    while (array[lunghezza] != NULL && array[lunghezza][0] != '\0') {
+        lunghezza++;
+    }
+
+    return lunghezza;
+}
+
+void printLottoWord() {
+    printf("          ..:---::.         .:----:..         .:----:.         ..:----:.         .::---:..\n"
+           "        :-=+++++++=-:.   .:=++++++++=-.    .-=++++++++=-.    :-=++++++++=:.   .:==+++++++=-:\n"
+           "      .=++-:.   .:-=+=:.:=+=-..   .:=++-..-++=:..  ..:=+=-..=++=:.   .:-=+=: :=+=-:.   .:-++=.\n"
+           "     :++-. =*=     .-++=++-. :-::--. .=+==+=:.-++++++-.:=+=++=..=++++++:.-++=++-.         .=++:\n"
+           "    .=+-.  +**       -+++: .===+==+*=..=++=.  -++**++-  .+++=. .=+***++:  -+++:   .-=+=:.  .=+=.\n"
+           "    :++.   +**       .++= .+=++=-+*-*+ :++=     -**-     =++:     =**.    .+++.   +*****=   :++:\n"
+           "    -++.   +**        ++= .*-*=..-++== :++=     -**-     =++:     =**.     =++    ******=   .++-\n"
+           "    :++-   +**:::.   :+++..+*==+-=*-+. -++=.    -**-    .=++-     =**.    :+++:   -****+:   -++:\n"
+           "     =++:  +******  :=+++=..-++++===. -++++=.   :**:   .=++++:    =**.   .=+++=.           :++-\n"
+           "     .-++-..:::::..-++=:=+=-..::.. .:=++-:=+=:. .--. .:=+=:-++-:. .-: ..-=+=:=+=-..     .:-++-.\n"
+           "       :=+++=====+++=:. .:=++======+++-.  .-+++======++=-.  :=+++======++=:. .:=++======+++=:\n"
+           "         .:--====-:..     .:--====--:.      .:--====--:.      .:--====--..     .:--====--:.\n");
+
+           printf("\n\n");
+}
+
+double takeAmount() {
+    double amount;
+
+    
+
+    do {
+        printf("\nInserisci importo: ");
+        scanf("%lf", &amount);
+
+        // if the player inserts a number out of range, tell him that is a not vvalid number
+        if (amount < 0 || amount > 200)
+            printf("L'importo deve essere compreso tra 0 e 200.\n");
+    } while(amount < 0 || amount > 200);
+
+    return amount;
+}
+
+/*
+!    WHEEL METHODS
+*/
+
+int takeNumberOfWheels(char menuOption[][100]) {
+    int choice;
+    int numberOfWheels;
+    int correctInserction;
+
+    printMenu(menuOption);
+
+    do {
+        correctInserction = 1;
+
+        printf("\nInserisci la tua scelta: ");
+        scanf("%d", &choice);
+
+        // If the user types a wrong choice, tell him that it's wrong
+        if (choice != 1 && choice != 2) {
+            printf("Puoi scegliere solo 1 o 2\n");
+            correctInserction = 0;
+        }
+    } while (!correctInserction);
+
+    // if the choice is 2
+    if (choice == 2)
+        numberOfWheels = 10; // set the number of wheels to ten
+    // if the player wnats to bet on 1 wheel, the choice is 1, so set the nummberOfWheel equal to choice
+    else
+        numberOfWheels = choice;
+
+    return numberOfWheels;
+}
+
+int takeSpecificWheel(char menuOption[][100]) {
+    int specificWheel;
+    int correctInserction;
+
+    printMenu(menuOption);
+
+    do {
+        correctInserction = 1;
+
+        printf("\nInserisci la tua scelta: ");
+        scanf("%d", &specificWheel);
+
+        // If the user types a wrong choice, tell him that it's wrong
+        if (specificWheel < 1 || specificWheel > 10) {
+            printf("Devi scegire 1 ruota o 10\n");
+            correctInserction = 0;
+        }
+    } while (!correctInserction);
+
+    return specificWheel;
+}
 
 void main()
 {
@@ -59,13 +178,43 @@ void main()
     int continueToPlay;
     char _pause;
 
-    printf("\n\n");
-}
+    ClrSrc();
+    printLottoWord();
 
-void printMenu(char menu[][100]) {
-    int lenght = sizeof(menu) / sizeof(menu[0]);
+    printMenu(introductionMenu);
 
-    for (int i = 0; i < lenght; i++) {
-        printf("%s\n", menu[i]);
+    printf("\nPremi invio per iniziare a giocare");
+    scanf("%c", &_pause);
+
+    ClrSrc();
+    printLottoWord();
+
+    printf("Step 1\n\tInserire l'importo\n\n");
+    // Ask the player to insert the amount of money he wants to bet
+    amount = takeAmount();
+
+    ClrSrc();
+    printLottoWord();
+
+    printf("Step 2\n\tScegliere su quante ruote giocare\n\n");
+    // Ask the player how many wheels he what to bet on
+    numberOfWheels = takeNumberOfWheels(numberOfWheelMenu);
+
+    // if the player wants to play on one wheel
+    //   1. then I make him choose which wheel
+    //   2. generate the wheel numbers
+    if (numberOfWheels <= 1) {
+        ClrSrc();
+        printLottoWord();
+        printf("Step 2.1\n\tScegliere su quale ruota giocare\n\n");
+        whatWheel = takeSpecificWheel(specificWheelsMenu);
+
+        wheels[whatWheel] = extractedWheel();
     }
+    else {
+        for (int i = 0; i < numberOfWheels; i++)
+            wheels[i] = extractedWheel();
+    }
+
+    printf("\n\n");
 }
