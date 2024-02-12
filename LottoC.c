@@ -19,7 +19,7 @@ int lenghtOfArrayOfString(char array[][100]) {
     return lunghezza;
 }
 
-void printMenu(char menu[][100]) {
+void PrintMenu(char menu[][100]) {
     printf("================\n");
     printf("%s", menu[0]);
     printf("\n================\n");
@@ -77,7 +77,7 @@ int takeNumberOfWheels(char menuOption[][100]) {
 
     printf("\n");
 
-    printMenu(menuOption);
+    PrintMenu(menuOption);
 
     do {
         correctInserction = 1;
@@ -106,7 +106,7 @@ int takeSpecificWheel(char menuOption[][100]) {
     int specificWheel;
     int correctInserction;
 
-    printMenu(menuOption);
+    PrintMenu(menuOption);
 
     do {
         correctInserction = 1;
@@ -133,8 +133,6 @@ int randomValue(int minValue, int maxValue) {
 void ExtractedWheel(int *numbers) {
     int minValue = 1, maxValue = 10;
     int wheelSize = 5;
-
-    srand(time(NULL)); // Inizializza il seme del generatore casuale
 
     for (int i = 0; i < wheelSize; i++) {
         numbers[i] = randomValue(minValue, maxValue);
@@ -205,7 +203,7 @@ void TakePlayerBetTypes(int *playerBetTypes, int lenght, int playedNumbers, char
     int userBet;
     int continueToInsert = 1, correctInserction;
 
-    printMenu(menuOptions);
+    PrintMenu(menuOptions);
 
     for (int i = 0; i < lenght && continueToInsert; i++) {
         do {
@@ -328,9 +326,9 @@ int returnBetFromWheel(int playerNumbers[], int lenghtPlayerNumbers, int wheelNu
     return betTypeOfWheel;
 }
 
-double calculationWinningPrice(int playerNumbers[], int lenghtPlayerNumbers, int wheel[], int lenghtWheelNumbers, int playerBetTypes[],
+double calculationWinningPrice(int playerNumbers[], int wheel[], int lenghtWheelNumbers, int playerBetTypes[],
                                 double amount, int numberOfWheels, int counterOfPlayedNumbers) {
-    int betFromWheel = returnBetFromWheel(playerNumbers, lenghtPlayerNumbers, wheel, lenghtWheelNumbers);
+    int betFromWheel = returnBetFromWheel(playerNumbers, counterOfPlayedNumbers, wheel, lenghtWheelNumbers);
     int howManyBet;
     double price = 0;
 
@@ -418,91 +416,104 @@ void main()
     int continueToPlay;
     char _pause;
 
+    // initialize the seed of the random generator
+    srand(time(NULL));
+
     ClrSrc();
     PrintLottoWord();
 
-    printMenu(introductionMenu);
+    PrintMenu(introductionMenu);
 
     printf("\nPremi invio per iniziare a giocare");
     scanf("%c", &_pause);
 
-    ClrSrc();
-    PrintLottoWord();
-
-    printf("Step 1\n\tInserire l'importo\n\n");
-    // Ask the player to insert the amount of money he wants to bet
-    amount = takeAmount();
-
-    ClrSrc();
-    PrintLottoWord();
-
-    printf("Step 2\n\tScegliere su quante ruote giocare\n");
-    // Ask the player how many wheels he what to bet on
-    numberOfWheels = takeNumberOfWheels(numberOfWheelMenu);
-
-    // if the player wants to play on one wheel
-    //   1. then I make him choose which wheel
-    //   2. generate the wheel numbers
-    if (numberOfWheels <= 1) {
+    do {
         ClrSrc();
         PrintLottoWord();
-        printf("Step 2.1\n\tScegliere su quale ruota giocare\n\n");
-        whatWheel = takeSpecificWheel(specificWheelsMenu);
 
-        ExtractedWheel(wheels[whatWheel - 1]);
-    }
-    // else
-    //   generate the wheel numbers for all the wheels
-    else {
-        for (int i = 0; i < numberOfWheels; i++)
-            ExtractedWheel(wheels[i]);
-    }
+        printf("Step 1\n\tInserire l'importo\n\n");
+        // Ask the player to insert the amount of money he wants to bet
+        amount = takeAmount();
 
-    ClrSrc();
-    PrintLottoWord();
-    printf("Step 3\n\tInserire i propri numeri\n\n");
+        ClrSrc();
+        PrintLottoWord();
 
-    TakePlayerNumbers(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
+        printf("Step 2\n\tScegliere su quante ruote giocare\n");
+        // Ask the player how many wheels he what to bet on
+        numberOfWheels = takeNumberOfWheels(numberOfWheelMenu);
 
-    counterOfPlayedNumbers = RetrivePlayedNumbers(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
+        whatWheel = 0; // restore the whatWheel variable
 
-    ClrSrc();
-    PrintLottoWord();
-    printf("Step 4\n\tInserire su cosa si vuole scommettere\n\n");
+        // if the player wants to play on one wheel
+        //   1. then I make him choose which wheel
+        //   2. generate the wheel numbers
+        if (numberOfWheels <= 1) {
+            ClrSrc();
+            PrintLottoWord();
+            printf("Step 2.1\n\tScegliere su quale ruota giocare\n\n");
+            whatWheel = takeSpecificWheel(specificWheelsMenu);
 
-    TakePlayerBetTypes(playerBetTypes, sizeof(playerBetTypes) / sizeof(playerBetTypes[0]), counterOfPlayedNumbers, betTypeMenu);
-
-    // Calcualate the lenght of wheel[whatWheel] arrays
-    // I can reuse this becouse the lenght is the same for all the wheels
-    int _lenghtWheelNums = sizeof(wheels[0]) / sizeof(wheels[0][0]); 
-
-    /* CALCULATION OF THE WINNIG PRIZE */
-    // if the player chooses to play on all the wheels, whatWheel will be 0 so calculate the winning prize for all the wheel    
-    if (whatWheel == 0) {
-        printf("Ecco le ruote: \n");
-        for (int i = 0; i < numberOfWheels; i++) {
-            PrintWheel(wheels[i], sizeof(wheels[i]) / sizeof(wheels[i][0]));
-            printf("\n");
-            price += calculationWinningPrice(playerNumbers, counterOfPlayedNumbers, wheels[i], _lenghtWheelNums, playerBetTypes, amount, numberOfWheels, counterOfPlayedNumbers);
+            ExtractedWheel(wheels[whatWheel - 1]);
         }
-    }
-    // if the player chooses to play on a specific wheel, the whatWheel number will be a number so calculate the prize for that specific wheel
-    else {
-        
-        
-        // Print the wheel which the player choose
-        printf("\n\nEcco la ruota che hai scelto: ");
-        PrintWheel(wheels[whatWheel - 1], sizeof(wheels[whatWheel - 1]) / sizeof(wheels[whatWheel - 1][0]));
+        // else
+        //   generate the wheel numbers for all the wheels
+        else {
+            for (int i = 0; i < numberOfWheels; i++)
+                ExtractedWheel(&wheels[i][0]);
+        }
 
-        // Calculate the price
-        price += calculationWinningPrice(playerNumbers, counterOfPlayedNumbers, wheels[whatWheel - 1], _lenghtWheelNums, playerBetTypes, amount, numberOfWheels, counterOfPlayedNumbers);
-    }
-    /* END CALCULATION OF THE WINNIG PRIZE */
+        ClrSrc();
+        PrintLottoWord();
+        printf("Step 3\n\tInserire i propri numeri\n\n");
 
-    printf("\n\nEcco i tuoi numeri: ");
-    PrintWheel(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
+        TakePlayerNumbers(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
 
-    printf("\n\nHai vinto: %.2f euro\n", price);
+        counterOfPlayedNumbers = RetrivePlayedNumbers(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
+
+        ClrSrc();
+        PrintLottoWord();
+        printf("Step 4\n\tInserire su cosa si vuole scommettere\n\n");
+
+        TakePlayerBetTypes(playerBetTypes, sizeof(playerBetTypes) / sizeof(playerBetTypes[0]), counterOfPlayedNumbers, betTypeMenu);
+
+        // Calcualate the lenght of wheel[whatWheel] arrays
+        // I can reuse this becouse the lenght is the same for all the wheels
+        int _lenghtWheelNums = sizeof(wheels[0]) / sizeof(wheels[0][0]); 
+
+        /* CALCULATION OF THE WINNIG PRIZE */
+        // if the player chooses to play on all the wheels, whatWheel will be 0 so calculate the winning prize for all the wheel    
+        if (whatWheel == 0) {
+            printf("Ecco le ruote: \n");
+            for (int i = 0; i < numberOfWheels; i++) {
+                PrintWheel(wheels[i], sizeof(wheels[i]) / sizeof(wheels[i][0]));
+                printf("\n");
+                price += calculationWinningPrice(playerNumbers, wheels[i], _lenghtWheelNums, playerBetTypes, amount, numberOfWheels, counterOfPlayedNumbers);
+            }
+        }
+        // if the player chooses to play on a specific wheel, the whatWheel number will be a number so calculate the prize for that specific wheel
+        else {
+            // Print the wheel which the player choose
+            printf("\n\nEcco la ruota che hai scelto: ");
+            PrintWheel(wheels[whatWheel - 1], sizeof(wheels[whatWheel - 1]) / sizeof(wheels[whatWheel - 1][0]));
+
+            // Calculate the price
+            price += calculationWinningPrice(playerNumbers, wheels[whatWheel - 1], _lenghtWheelNums, playerBetTypes, amount, numberOfWheels, counterOfPlayedNumbers);
+        }
+        /* END CALCULATION OF THE WINNIG PRIZE */
+
+        // Print the player numbers
+        printf("\n\nEcco i tuoi numeri: ");
+        PrintWheel(playerNumbers, sizeof(playerNumbers) / sizeof(playerNumbers[0]));
+
+        // print how much the player wins
+        printf("\n\nHai vinto: %.2f euro\n", price);
+
+        // Ask the player if he wants to continue 
+        PrintMenu(continueToPlayMenu);
+        printf("Inserisci la scelta: ");
+        scanf("%d", &continueToPlay);
+    } while (continueToPlay);
+
 
     printf("\n\n");
 }
